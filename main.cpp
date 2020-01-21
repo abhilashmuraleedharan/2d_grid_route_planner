@@ -88,7 +88,7 @@ auto readBoardFile(const string path) {
 string cellString(State state) {
    switch(state) {
       case State::kObstacle: return  "⛰️  ";
-      default: return "0 ";
+      default: return "0  ";
    }
 }
     
