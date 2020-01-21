@@ -21,9 +21,9 @@
  * where 0 represents empty space and 1 represents obstacle.
  *
  * Initial aim is to write code to
- * a) Read the board files
- * b) Parse the data from the file and store it in program
- * c) Print the board data onto Terminal in nice ASCII Format.
+ * a) Read the board file
+ * b) Parse the data from the file and store the board in program
+ * c) Print the board onto Terminal in nice ASCII Format.
  */
 
 #include <iostream>
