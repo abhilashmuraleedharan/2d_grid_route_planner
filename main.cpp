@@ -26,6 +26,20 @@
  * c) Print the board onto Terminal in nice ASCII Format.
  */
 
+/*
+ * STAGE 2:
+ * Write the A* Search Function that implements A* algorithm to find
+ * the most optimum path between two nodes in the ASCII grid.
+ * 
+ * A* Algorithm finds a path from the start node to the end node
+ * by checking for open neighbours of the current node, computing
+ * a heuristic for each of the neighbours, and adding those neighbours
+ * to the list of open nodes to explore next. The next node to explore
+ * is the one with the lowest total cost+heuristic (g+h).
+ * This process is repeated until the end is found, as long as there 
+ * are still open nodes to explore.
+ */
+
 #include <iostream>
 #include <vector>
 #include <string>
