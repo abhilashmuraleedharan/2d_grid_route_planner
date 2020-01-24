@@ -112,9 +112,9 @@ string cellString(State state) {
 /*
  * Print the board states in ASCII string format
  */
-void printBoard(const vector<vector<State>> board) {
-   for(auto row: board) {
-      for (auto cell: row) {
+void printBoard(const vector<vector<State>> & board) {
+   for(auto row : board) {
+      for (auto cell : row) {
          cout << cellString(cell);
       }
       cout << endl;
