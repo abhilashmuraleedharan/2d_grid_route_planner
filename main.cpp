@@ -5,11 +5,14 @@
  * Author: Abhilash Muraleedharan
  *
  ********************************/
+
 /*
- * STAGE 1:
  * To start small, write a program that will plan route between 
  * two points in an ASCII board with empty spaces and obstacles.
- *
+ */
+
+/*
+ * STAGE 1: 
  * First aim is to write code that will parse a board file which 
  * contain the state information in 1s and 0s separated by a comma.
  * For e.g.
@@ -28,15 +31,15 @@
 
 /*
  * STAGE 2:
- * Write the A* Search Function that implements A* algorithm to find
- * the most optimum path between two nodes in the ASCII grid.
+ * Write an A* Search Function that implements the A* algorithm 
+ * to find the most optimum path between two cells in the grid.
  * 
  * A* Algorithm finds a path from the start node to the end node
  * by checking for open neighbours of the current node, computing
  * a heuristic for each of the neighbours, and adding those neighbours
  * to the list of open nodes to explore next. The next node to explore
  * is the one with the lowest total cost+heuristic (g+h).
- * This process is repeated until the end is found, as long as there 
+ * This process is repeated until the end is found or as long as there 
  * are still open nodes to explore.
  */
 
