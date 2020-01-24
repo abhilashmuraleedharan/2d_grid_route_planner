@@ -48,18 +48,27 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <algorithm> // For std::sort
 using std::cout;
 using std::endl;
 using std::vector;
 using std::string;
 using std::ifstream;
 using std::istringstream;
+using std::abs;
+using std::sort;
 
 // Custom State Type
 enum class State {
    kEmpty,     // To represent empty cell
    kObstacle,  // To represent cell containing obstacle
+   kClosed,    // To represent processed cell
+   kPath,      // To represent path cell
+   kStart,     // To represent start cell
+   kFinish,     // To represent goal cell
 };
+
+const int direction_delta[4][2] = {{-1,0}, {1,0}, {0,-1}, {0,1}};
 
 /*
  * Helper Function that parses a string 
@@ -105,6 +114,9 @@ auto readBoardFile(const string path) {
 string cellString(State state) {
    switch(state) {
       case State::kObstacle: return  "⛰️  ";
+      case State::kPath: return "🚗   ";
+      case State::kStart: return "🚦   ";
+      case State::kFinish: return "🏁   ";
       default: return "0  ";
    }
 }
@@ -119,6 +131,164 @@ void printBoard(const vector<vector<State>> & board) {
       }
       cout << endl;
    }
+}
+
+/*
+ * To Compute Heuristic value for each node.
+ * In A* algorithm, heuristic value is the manhattan
+ * distance between given node and goal node
+ */
+int heuristic(int x1, int y1, int x2, int y2) {
+   return abs(x2 - x1) + abs(y2 - y1);
+}
+
+/*
+ * Adds the given node to given list of open nodes
+ * and updates the state of that node in the grid to closed.
+ */
+void addToOpenNodes(vector<int> node, vector<vector<int>> & open,
+                    vector<vector<State>> & grid) {
+   open.push_back(node);
+   int x = node[0]; int y = node[1];
+   grid[x][y] = State::kClosed;
+}
+
+/*
+ * Helper function for sorting the list in 
+ * descending order
+ */
+bool compare(vector<int> node1, vector<int> node2) {
+   int f1 = node1[2] + node1[3]; // f = g + h
+   int f2 = node2[2] + node2[3];
+   return f2 > f1;
+}
+
+/*
+ * Sort the given vector in descending order
+ * using custom compare function
+ */
+void sortNodes(vector<vector<int>> *v) {
+   sort(v->begin(), v->end(), compare);
+}
+
+/*
+ * Returns true if the given node position is 
+ * a) On the grid
+ * b) Is empty 
+ * else returns false
+ */
+bool validOpenNodePos(int x, int y, const vector<vector<State>> & grid) {
+   bool x_on_grid = (x >= 0 && x <= (grid[0].size() - 1));
+   bool y_on_grid = (y >= 0 && y <= (grid.size() - 1));
+   if (x_on_grid && y_on_grid && grid[x][y] == State::kEmpty) {
+      return true;
+   } else { return false; }
+}
+
+/*
+ * Expand from current node to neighbouring nodes
+ * While iterating through neighbouring nodes,
+ * If the node is open (not closed && empty && on grid)
+ * then add that node to open list else skip that node
+ */
+void expandNeighbours(const vector<int> currNode,
+                      const int goal[2],
+                      vector<vector<int>> & open, 
+                      vector<vector<State>> & grid) {
+   // Iterate through potential neighbour node positions
+   for (int i=0; i<4; i++) {  // limit 4 is taken from direction_delta 2D array
+      int x = currNode[0] + direction_delta[i][0];
+      int y = currNode[1] + direction_delta[i][1];
+      if (validOpenNodePos(x, y, grid)) {
+         // Valid open node position. Assign g and h values and add to open list
+         int g = currNode[2] + 1;
+         int h = heuristic(x, y, goal[0], goal[1]);
+         // Form the node and add it to open list
+         vector<int> node{x, y, g, h};
+         addToOpenNodes(node, open, grid);
+      }
+   }
+}
+
+/*
+ * Finds the optimum path between start and finish
+ * points in the given grid using A* search algorithm
+ * and returns the solved grid.
+ */
+vector<vector<State>> searchPath(vector<vector<State>> grid, const int init[2], const int goal[2]) {
+
+   /*
+    * For A* Search algorithm,
+    * There should be a list of open nodes which it will check 
+    * every iteration. Each node should contain following information
+    *   Position 
+    *   g value (Represents the cost/steps it took to reach that node from starting node)
+    *   h value (Represents the Manhattan distance between this node and finishing node)
+    * As you get closer to goal, h value decreases and g value increases.
+    * 
+    * A* search algorithm picks the node that has the least g+h value from the list of open
+    * nodes and expand from it to neighbouring nodes.
+    * The neighbouring nodes that are not yet closed(already processed), are on grid and are
+    * empty will get added to open nodes list. Once a node is added to open nodes list, it's
+    * state should be closed.
+    * Keep picking the node with lowest f value(g+h) from the open nodes list and process it 
+    * as described above until the path to goal node is found or until there are no more nodes
+    * present in the open list.
+    */
+
+   /*
+    * Form the starting node to be added to list of open node
+    */
+   int x = init[0]; int y = init[1];  // Position information
+   int g = 0; // Cost
+   int h = heuristic(x, y, goal[0], goal[1]);  // Calculates Manhattan distance to goal node
+   vector<int> startNode{x, y, g, h}; 
+
+   /*
+    * Add the node to list of open nodes
+    */
+   vector<vector<int>> openNodes{};  // Empty list of open nodes
+   addToOpenNodes(startNode, openNodes, grid);  // Add the starting node to list of open nodes
+
+   /*
+    * Keep processing the list of open nodes until the list is empty
+    * or until the goal node is reached
+    */
+   while(!openNodes.empty()) {
+      /*
+       * To fetch the node with the least (g+h) value from the open nodes list,
+       * sort the list in descending order and pick the last node as the current
+       * node to expand to neighbours
+       */
+      sortNodes(&openNodes); // Sort the list in descending order
+      
+      // Fetch current node
+      vector<int> currNode = openNodes.back();
+      openNodes.pop_back();
+      
+      // Extract position data
+      int x = currNode[0]; int y = currNode[1];
+
+      // Check if current node is the goal node
+      if (x == goal[0] && y == goal[1]) {
+         // Reached goal. Mark start and end State in grid
+         int startX = init[0]; int startY = init[1];
+         grid[startX][startY] = State::kStart;
+         grid[x][y] = State::kFinish;
+
+         return grid;
+      }
+
+      // Update grid State for the current node
+      grid[x][y] = State::kPath;
+
+      // Expand neighbours and add valid nodes to open nodes list
+      expandNeighbours(currNode, goal, openNodes, grid);
+   }
+
+   // No path to goal was found. Return an empty grid
+   vector<vector<State>> solution{};
+   return solution;
 }
 
 int main(int argc, char *argv[]) {
@@ -137,8 +307,23 @@ int main(int argc, char *argv[]) {
    // Read state data from file and populate board
    board = readBoardFile(path); 
 
-   // Print board data in ASCII format
-   printBoard(board); 
+   // Define starting and finishing position
+   int startPosition[2] = {0,0};
+   int finishPosition[2] = {4,5};
+
+   /*
+    * Search for the optimum path between start to finish
+    * using A* Search Algorithm and return the solution
+    * grid board
+    */
+   auto solution = searchPath(board, startPosition, finishPosition);
+
+   if (solution.empty()) {
+      cout << "No path found" << endl;
+   } else {
+      // Print the solved grid board
+      printBoard(solution); 
+   }
 
    return 0;
 }
