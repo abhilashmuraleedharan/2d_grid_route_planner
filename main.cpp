@@ -55,10 +55,10 @@ using std::string;
 using std::ifstream;
 using std::istringstream;
 
-// Define State
+// Custom State Type
 enum class State {
-   kEmpty,
-   kObstacle,
+   kEmpty,     // To represent empty cell
+   kObstacle,  // To represent cell containing obstacle
 };
 
 /*
