@@ -113,11 +113,11 @@ auto readBoardFile(const string path) {
  */
 string cellString(State state) {
    switch(state) {
-      case State::kObstacle: return  "⛰️  ";
+      case State::kObstacle: return  "⛰️   ";
       case State::kPath: return "🚗   ";
       case State::kStart: return "🚦   ";
       case State::kFinish: return "🏁   ";
-      default: return "0  ";
+      default: return "0   "; 
    }
 }
     
@@ -157,10 +157,10 @@ void addToOpenNodes(vector<int> node, vector<vector<int>> & open,
  * Helper function for sorting the list in 
  * descending order
  */
-bool compare(vector<int> node1, vector<int> node2) {
+bool compare(const vector<int> node1, const vector<int> node2) {
    int f1 = node1[2] + node1[3]; // f = g + h
    int f2 = node2[2] + node2[3];
-   return f2 > f1;
+   return f1 > f2;
 }
 
 /*
@@ -178,8 +178,8 @@ void sortNodes(vector<vector<int>> *v) {
  * else returns false
  */
 bool validOpenNodePos(int x, int y, const vector<vector<State>> & grid) {
-   bool x_on_grid = (x >= 0 && x <= (grid[0].size() - 1));
-   bool y_on_grid = (y >= 0 && y <= (grid.size() - 1));
+   bool x_on_grid = (x >= 0 && x < grid.size());
+   bool y_on_grid = (y >= 0 && y < grid[0].size());
    if (x_on_grid && y_on_grid && grid[x][y] == State::kEmpty) {
       return true;
    } else { return false; }
