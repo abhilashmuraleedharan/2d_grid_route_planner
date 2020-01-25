@@ -114,8 +114,8 @@ auto readBoardFile(const string path) {
 string cellString(State state) {
    switch(state) {
       case State::kObstacle: return  "⛰️   ";
-      case State::kPath: return "🚗   ";
-      case State::kStart: return "🚦   ";
+      case State::kPath: return "🚗  ";
+      case State::kStart: return "🚦  ";
       case State::kFinish: return "🏁   ";
       default: return "0   "; 
    }
@@ -308,8 +308,8 @@ int main(int argc, char *argv[]) {
    board = readBoardFile(path); 
 
    // Define starting and finishing position
-   int startPosition[2] = {0,0};
-   int finishPosition[2] = {4,5};
+   int startPosition[2] = {0, 0};
+   int finishPosition[2] = {4, 5};
 
    /*
     * Search for the optimum path between start to finish
