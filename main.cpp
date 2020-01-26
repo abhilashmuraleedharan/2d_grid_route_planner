@@ -8,15 +8,15 @@
 
 /*
  * To start small, write a program that will plan route between 
- * two points in an ASCII board with empty spaces and obstacles.
+ * two points in an ASCII grid with empty spaces and obstacles.
  */
 
 /*
  * STAGE 1: 
- * First aim is to write code that will parse a board file which 
+ * First aim is to write code that will parse a grid file which 
  * contain the state information in 1s and 0s separated by a comma.
  * For e.g.
- * Board File might look something like this
+ * Grid File might look something like this
  *   0,1,0,0,0,0,
  *   0,1,0,0,0,0,
  *   0,0,1,0,0,0,
@@ -24,9 +24,9 @@
  * where 0 represents empty space and 1 represents obstacle.
  *
  * Initial aim is to write code to
- * a) Read the board file
- * b) Parse the data from the file and store the board in program
- * c) Print the board onto Terminal in nice ASCII Format.
+ * a) Read the grid file
+ * b) Parse the data from the file and store the grid board in program
+ * c) Print the grid board onto Terminal in nice ASCII Format.
  */
 
 /*
@@ -65,7 +65,7 @@ enum class State {
    kClosed,    // To represent processed cell
    kPath,      // To represent path cell
    kStart,     // To represent start cell
-   kFinish,     // To represent goal cell
+   kFinish,    // To represent goal cell
 };
 
 const int direction_delta[4][2] = {{-1,0}, {1,0}, {0,-1}, {0,1}};
@@ -90,21 +90,27 @@ vector<State> parseLine(string line) {
 
 /*
  * Reads the file denoted by input path and
- * returns a board object containing State cells
+ * returns a grid object containing State cells
  */
-auto readBoardFile(const string path) {
+auto readGridFile(const string path) {
    ifstream bFile(path);
-   vector<vector<State>> board{};
+   vector<vector<State>> grid{};
 
    if (bFile) {
       string line;
       vector<State> row;
       while(getline(bFile, line)) {
          row = parseLine(line);
-         board.push_back(row);
+	      if (row.empty()) {
+            cout << "Failed to parse grid file. Invalid content!" << endl;
+	         grid.clear(); 
+            return grid;
+	      }
+         grid.push_back(row);
+	      row.clear();
       }
    }
-   return board;    
+   return grid;    
 }
 
 /*
@@ -122,10 +128,10 @@ string cellString(State state) {
 }
     
 /*
- * Print the board states in ASCII string format
+ * Print the grid states in ASCII string format
  */
-void printBoard(const vector<vector<State>> & board) {
-   for(auto row : board) {
+void printBoard(const vector<vector<State>> & grid) {
+   for(auto row : grid) {
       for (auto cell : row) {
          cout << cellString(cell);
       }
@@ -144,7 +150,7 @@ int heuristic(int x1, int y1, int x2, int y2) {
 
 /*
  * Adds the given node to given list of open nodes
- * and updates the state of that node in the grid to closed.
+ * and updates the state of that node in the grid to kClosed.
  */
 void addToOpenNodes(vector<int> node, vector<vector<int>> & open,
                     vector<vector<State>> & grid) {
@@ -165,10 +171,20 @@ bool compare(const vector<int> node1, const vector<int> node2) {
 
 /*
  * Sort the given vector in descending order
- * using custom compare function
+ * using the custom compare function
  */
 void sortNodes(vector<vector<int>> *v) {
    sort(v->begin(), v->end(), compare);
+}
+
+/*
+ * Helper function that checks whether the given 
+ * x and y values are valid positions on given grid
+ */
+bool validPosOnGrid(int x, int y, const vector<vector<State>> & grid) {
+   bool x_on_grid = (x >= 0 && x < grid.size());
+   bool y_on_grid = (y >= 0 && y < grid[0].size());
+   return x_on_grid && y_on_grid;
 }
 
 /*
@@ -178,17 +194,15 @@ void sortNodes(vector<vector<int>> *v) {
  * else returns false
  */
 bool validOpenNodePos(int x, int y, const vector<vector<State>> & grid) {
-   bool x_on_grid = (x >= 0 && x < grid.size());
-   bool y_on_grid = (y >= 0 && y < grid[0].size());
-   if (x_on_grid && y_on_grid && grid[x][y] == State::kEmpty) {
-      return true;
+   if (validPosOnGrid(x, y, grid)) {
+      return grid[x][y] == State::kEmpty;
    } else { return false; }
 }
 
 /*
- * Expand from current node to neighbouring nodes
+ * Expand from current node to neighbouring nodes.
  * While iterating through neighbouring nodes,
- * If the node is open (not closed && empty && on grid)
+ * if the node is open i.e. (not closed && empty && on grid)
  * then add that node to open list else skip that node
  */
 void expandNeighbours(const vector<int> currNode,
@@ -201,7 +215,7 @@ void expandNeighbours(const vector<int> currNode,
       int y = currNode[1] + direction_delta[i][1];
       if (validOpenNodePos(x, y, grid)) {
          // Valid open node position. Assign g and h values and add to open list
-         int g = currNode[2] + 1;
+         int g = currNode[2] + 1;  // Increment the cost value by 1.
          int h = heuristic(x, y, goal[0], goal[1]);
          // Form the node and add it to open list
          vector<int> node{x, y, g, h};
@@ -221,7 +235,7 @@ vector<vector<State>> searchPath(vector<vector<State>> grid, const int init[2], 
     * For A* Search algorithm,
     * There should be a list of open nodes which it will check 
     * every iteration. Each node should contain following information
-    *   Position 
+    *   x and y position values 
     *   g value (Represents the cost/steps it took to reach that node from starting node)
     *   h value (Represents the Manhattan distance between this node and finishing node)
     * As you get closer to goal, h value decreases and g value increases.
@@ -260,9 +274,9 @@ vector<vector<State>> searchPath(vector<vector<State>> grid, const int init[2], 
        * sort the list in descending order and pick the last node as the current
        * node to expand to neighbours
        */
-      sortNodes(&openNodes); // Sort the list in descending order
+      sortNodes(&openNodes); // Sorts the list in descending order
       
-      // Fetch current node
+      // Fetch the node with least g+h value
       vector<int> currNode = openNodes.back();
       openNodes.pop_back();
       
@@ -275,11 +289,10 @@ vector<vector<State>> searchPath(vector<vector<State>> grid, const int init[2], 
          int startX = init[0]; int startY = init[1];
          grid[startX][startY] = State::kStart;
          grid[x][y] = State::kFinish;
-
          return grid;
       }
 
-      // Update grid State for the current node
+      // Not goal node. Update grid State for the current node
       grid[x][y] = State::kPath;
 
       // Expand neighbours and add valid nodes to open nodes list
@@ -291,38 +304,89 @@ vector<vector<State>> searchPath(vector<vector<State>> grid, const int init[2], 
    return solution;
 }
 
+void getUserInput(int init[], int goal[], const vector<vector<State>> & grid) {
+   int x=0; int y=0; 
+   string line; 
+   bool bReadInput = false;
+
+   while(!bReadInput) {
+      cout << "Enter the row and column values of your starting cell in grid" << endl; 
+      cout << "separated by space. For e.g: enter 0 0 to choose the very first cell in the top row!" << endl;
+      getline(std::cin, line);
+      istringstream stream(line);
+      if (stream) {
+         stream >> x >> y; 
+         if (validPosOnGrid(x, y, grid)) { 
+            bReadInput = true; 
+            init[0] = x;
+            init[1] = y;
+         }
+      }
+      if (bReadInput == false) { 
+         cout << "Invalid Input. Enter values separated by space and ensure the values are valid grid positions" << endl;
+      } else {
+         bReadInput = false;
+         cout << "Enter the row and column values of your finishing cell in grid" << endl;
+         getline(std::cin, line);
+         istringstream stream(line);
+         if (stream) {
+            stream >> x >> y;
+            if (validPosOnGrid(x, y, grid)) { 
+               bReadInput = true; 
+               goal[0] = x;
+               goal[1] = y;
+            }
+         }
+         if (bReadInput == false) { 
+            cout << "Invalid Input. Enter values separated by space and ensure the values are valid grid positions" << endl;
+         }
+      }
+   }
+}
+
 int main(int argc, char *argv[]) {
-   // Declare an empty board
-   vector<vector<State>> board{};
+   // Declare an empty grid
+   vector<vector<State>> grid{};
    
    if (argc < 2) {
-      cout << "Provide a valid board file path as argument" << endl;
+      cout << "Provide a valid grid file path as the argument." << endl;
       return 0;
    } 
 
    // Path string
    string path(argv[1]);
-   cout << "Board file path: " << path << endl;
+   cout << "Input grid file path: " << path << endl << endl;
 
-   // Read state data from file and populate board
-   board = readBoardFile(path); 
+   // Read state data from file and populate grid
+   grid = readGridFile(path); 
 
-   // Define starting and finishing position
-   int startPosition[2] = {0, 0};
-   int finishPosition[2] = {4, 5};
+   if (grid.empty()) { 
+      cout << "Invalid file path or grid file. Terminating program!" << endl;  
+      return 0;
+   }  
+
+   cout << "Valid grid board! Printing the grid" << endl;
+   printBoard(grid);
+
+   // Get the starting and finishing position
+   int startPosition[2]{};
+   int finishPosition[2]{};
+   getUserInput(startPosition, finishPosition, grid);
+   cout << endl;
 
    /*
     * Search for the optimum path between start to finish
     * using A* Search Algorithm and return the solution
     * grid board
     */
-   auto solution = searchPath(board, startPosition, finishPosition);
+   auto solutionGrid = searchPath(grid, startPosition, finishPosition);
 
-   if (solution.empty()) {
+   if (solutionGrid.empty()) {
       cout << "No path found" << endl;
    } else {
+      cout << "Optimum path found. Printing solution grid" << endl;
       // Print the solved grid board
-      printBoard(solution); 
+      printBoard(solutionGrid); 
    }
 
    return 0;
