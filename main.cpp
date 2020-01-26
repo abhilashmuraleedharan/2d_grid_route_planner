@@ -1,15 +1,10 @@
 /********************************
  *
- * OpenStreetMap_RoutePlanner Project
+ * 2D_Grid_RoutePlanner Project
  *
  * Author: Abhilash Muraleedharan
  *
  ********************************/
-
-/*
- * To start small, write a program that will plan route between 
- * two points in an ASCII grid with empty spaces and obstacles.
- */
 
 /*
  * STAGE 1: 
