@@ -69,7 +69,7 @@ enum class State {
    kChosen,    // To represent user chosen cell
 };
 
-const int direction_delta[4][2] = {{-1,0}, {1,0}, {0,-1}, {0,1}};
+const int direction_delta[4][2] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
 
 /*
  * Helper Function that parses a string 
