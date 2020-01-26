@@ -360,22 +360,21 @@ void getUserInput(int init[], int goal[], vector<vector<State>> & grid) {
    }
 }
 
-int main(int argc, char *argv[]) {
-   // Declare an empty grid
-   vector<vector<State>> grid{};
-   
-   if (argc < 2) {
-      cout << "Provide a valid grid file path as the argument." << endl;
-      return 0;
-   } 
+int main() {
+   cout << "Using A* search algorithm, this program will find the optimum path" << endl;
+   cout << "between any 2 user given points in a 2 Dimensional Grid comprising" << endl;
+   cout << "of randomly placed obstacles." << endl << endl;
 
-   // Path string
-   string path(argv[1]);
-   cout << endl;
-   cout << "Input grid file path: " << path << endl;
+   // Declare an empty grid
+   vector<vector<State>> grid{}; 
+
+   cout << "Choose a grid file from the grid_files folder and enter its name below" << endl;
+   string path("grid_files/");
+   string filename = "";
+   getline(std::cin, filename);
 
    // Read state data from file and populate grid
-   grid = readGridFile(path); 
+   grid = readGridFile(path+filename); 
 
    if (grid.empty()) { 
       cout << "Invalid file path or grid file. Terminating program!" << endl;  
