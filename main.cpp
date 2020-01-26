@@ -66,6 +66,7 @@ enum class State {
    kPath,      // To represent path cell
    kStart,     // To represent start cell
    kFinish,    // To represent goal cell
+   kChosen,    // To represent user chosen cell
 };
 
 const int direction_delta[4][2] = {{-1,0}, {1,0}, {0,-1}, {0,1}};
@@ -304,41 +305,56 @@ vector<vector<State>> searchPath(vector<vector<State>> grid, const int init[2], 
    return solution;
 }
 
-void getUserInput(int init[], int goal[], const vector<vector<State>> & grid) {
+void getUserInput(int init[], int goal[], vector<vector<State>> & grid) {
    int x=0; int y=0; 
    string line; 
    bool bReadInput = false;
-
+   cout << endl;
+   cout << "Rules to choose your own starting and finishing cell positions in the grid" << endl; 
+   cout << "======================================================================================" << endl;
+   cout << "1. Row and column index values start from 0" << endl;
+   cout << "   Meaning top left cell position is \"0 0\" and bottom right cell position is \"4 5\"" << endl;
+   cout << "2. Chosen cell position must be on the grid" << endl;
+   cout << "3. Only an empty cell (represented as 0 in grid) can be chosen" << endl;
+   cout << "4. Starting and finishing cell cannot be same" << endl;
+   cout << "======================================================================================" << endl << endl;
    while(!bReadInput) {
-      cout << "Enter the row and column values of your starting cell in grid" << endl; 
-      cout << "separated by space. For e.g: enter 0 0 to choose the very first cell in the top row!" << endl;
+      cout << "Enter starting cell row and column values in grid separated by a space" << endl; 
       getline(std::cin, line);
       istringstream stream(line);
       if (stream) {
          stream >> x >> y; 
-         if (validPosOnGrid(x, y, grid)) { 
-            bReadInput = true; 
-            init[0] = x;
-            init[1] = y;
+         if (validPosOnGrid(x, y, grid)) {
+            if (grid[x][y] == State::kEmpty) { 
+               bReadInput = true; 
+               init[0] = x;
+               init[1] = y;
+               grid[x][y] = State::kChosen; 
+            }
          }
       }
       if (bReadInput == false) { 
-         cout << "Invalid Input. Enter values separated by space and ensure the values are valid grid positions" << endl;
+         cout << "Invalid Input!!" << endl;
       } else {
          bReadInput = false;
-         cout << "Enter the row and column values of your finishing cell in grid" << endl;
+         cout << "Enter finishing cell row and column values in grid separated by a space" << endl;
          getline(std::cin, line);
          istringstream stream(line);
          if (stream) {
             stream >> x >> y;
-            if (validPosOnGrid(x, y, grid)) { 
-               bReadInput = true; 
-               goal[0] = x;
-               goal[1] = y;
+            if (validPosOnGrid(x, y, grid)) {
+               if (grid[x][y] == State::kEmpty) { 
+                  bReadInput = true; 
+                  goal[0] = x;
+                  goal[1] = y;
+               }
             }
          }
          if (bReadInput == false) { 
-            cout << "Invalid Input. Enter values separated by space and ensure the values are valid grid positions" << endl;
+            cout << "Invalid Input!!" << endl;
+            // Reset the state of chosen cell back to kEmpty
+            int chosenX = init[0]; int chosenY = init[1];
+            grid[chosenX][chosenY] = State::kEmpty;
          }
       }
    }
@@ -355,7 +371,8 @@ int main(int argc, char *argv[]) {
 
    // Path string
    string path(argv[1]);
-   cout << "Input grid file path: " << path << endl << endl;
+   cout << endl;
+   cout << "Input grid file path: " << path << endl;
 
    // Read state data from file and populate grid
    grid = readGridFile(path); 
@@ -384,7 +401,7 @@ int main(int argc, char *argv[]) {
    if (solutionGrid.empty()) {
       cout << "No path found" << endl;
    } else {
-      cout << "Optimum path found. Printing solution grid" << endl;
+      cout << "Optimum path found. Printing solution grid" << endl << endl;
       // Print the solved grid board
       printBoard(solutionGrid); 
    }
