@@ -45,7 +45,6 @@
 #include <sstream>
 #include <algorithm> // For std::sort
 using std::cout;
-using std::endl;
 using std::vector;
 using std::string;
 using std::ifstream;
@@ -98,7 +97,7 @@ auto readGridFile(const string path) {
       while(getline(bFile, line)) {
          row = parseLine(line);
 	      if (row.empty()) {
-            cout << "Failed to parse grid file. Invalid content!" << endl;
+            cout << "Failed to parse grid file. Invalid content!\n";
 	         grid.clear(); 
             return grid;
 	      }
@@ -131,7 +130,7 @@ void printBoard(const vector<vector<State>> & grid) {
       for (auto cell : row) {
          cout << cellString(cell);
       }
-      cout << endl;
+      cout << "\n";
    }
 }
 
@@ -304,17 +303,17 @@ void getUserInput(int init[], int goal[], vector<vector<State>> & grid) {
    int x=0; int y=0; 
    string line; 
    bool bReadInput = false;
-   cout << endl;
-   cout << "Rules to choose your own starting and finishing cell positions in the grid" << endl; 
-   cout << "======================================================================================" << endl;
-   cout << "1. Row and column index values start from 0" << endl;
-   cout << "   Meaning top left cell position is \"0 0\" and bottom right cell position is \"4 5\"" << endl;
-   cout << "2. Chosen cell position must be on the grid" << endl;
-   cout << "3. Only an empty cell (represented as 0 in grid) can be chosen" << endl;
-   cout << "4. Starting and finishing cell cannot be same" << endl;
-   cout << "======================================================================================" << endl << endl;
+   cout << "\n";
+   cout << "Choose your own starting and finishing cell positions in the grid\n"; 
+   cout << "======================================================================================\n";
+   cout << "1. Row and column index values start from 0\n";
+   cout << "   Meaning top left cell position is \"0 0\" and bottom right cell position is \"4 5\"\n";
+   cout << "2. Chosen cell position must be on the grid\n";
+   cout << "3. Only an empty cell (represented as 0 in grid) can be chosen\n";
+   cout << "4. Starting and finishing cell cannot be same\n";
+   cout << "======================================================================================\n";
    while(!bReadInput) {
-      cout << "Enter starting cell row and column values in grid separated by a space" << endl; 
+      cout << "Enter starting cell row and column values in grid separated by a space\n";
       getline(std::cin, line);
       istringstream stream(line);
       if (stream) {
@@ -329,10 +328,10 @@ void getUserInput(int init[], int goal[], vector<vector<State>> & grid) {
          }
       }
       if (bReadInput == false) { 
-         cout << "Invalid Input!!" << endl;
+         cout << "Invalid Input!!\n";
       } else {
          bReadInput = false;
-         cout << "Enter finishing cell row and column values in grid separated by a space" << endl;
+         cout << "Enter finishing cell row and column values in grid separated by a space\n";
          getline(std::cin, line);
          istringstream stream(line);
          if (stream) {
@@ -346,7 +345,7 @@ void getUserInput(int init[], int goal[], vector<vector<State>> & grid) {
             }
          }
          if (bReadInput == false) { 
-            cout << "Invalid Input!!" << endl;
+            cout << "Invalid Input!!\n";
             // Reset the state of chosen cell back to kEmpty
             int chosenX = init[0]; int chosenY = init[1];
             grid[chosenX][chosenY] = State::kEmpty;
@@ -356,14 +355,14 @@ void getUserInput(int init[], int goal[], vector<vector<State>> & grid) {
 }
 
 int main() {
-   cout << "Using A* search algorithm, this program will find the optimum path" << endl;
-   cout << "between any 2 user given points in a 2 Dimensional Grid comprising" << endl;
-   cout << "of randomly placed obstacles." << endl << endl;
+   cout << "Using A* search algorithm, this program will find the optimum path\n";
+   cout << "between any 2 user given points in a 2 Dimensional Grid comprising\n";
+   cout << "of randomly placed obstacles.\n\n";
 
    // Declare an empty grid
    vector<vector<State>> grid{}; 
 
-   cout << "Choose a grid file from the grid_files folder and enter its name below" << endl;
+   cout << "Choose a grid file from the grid_files folder and enter its name below\n";
    string path("grid_files/");
    string filename = "";
    getline(std::cin, filename);
@@ -372,18 +371,18 @@ int main() {
    grid = readGridFile(path+filename); 
 
    if (grid.empty()) { 
-      cout << "Invalid file path or grid file. Terminating program!" << endl;  
+      cout << "Invalid file path or grid file. Terminating program!\n";  
       return 0;
    }  
 
-   cout << "Valid grid board! Printing the grid" << endl;
+   cout << "Valid grid board! Printing the grid\n";
    printBoard(grid);
 
    // Get the starting and finishing position
    int startPosition[2]{};
    int finishPosition[2]{};
    getUserInput(startPosition, finishPosition, grid);
-   cout << endl;
+   cout << "\n";
 
    /*
     * Search for the optimum path between start to finish
@@ -393,9 +392,9 @@ int main() {
    auto solutionGrid = searchPath(grid, startPosition, finishPosition);
 
    if (solutionGrid.empty()) {
-      cout << "No path found" << endl;
+      cout << "No path found\n";
    } else {
-      cout << "Optimum path found. Printing solution grid" << endl << endl;
+      cout << "Optimum path found. Printing solution grid\n\n";
       // Print the solved grid board
       printBoard(solutionGrid); 
    }
